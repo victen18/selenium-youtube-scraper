@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import pandas as pd
+import os
+import smtplib
 
 YOUTUBE_TRENDING_URL = "https://www.youtube.com/feed/trending?bp=6gQJRkVleHBsb3Jl"
 
@@ -43,24 +45,52 @@ def parse_video(video):
     }
 
 
+def send_email(body):
+    try:
+        server_ssl = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server_ssl.ehlo()
+
+        SENDER_EMAIL = "infomat.vikram@gmail.com"
+        RECEIVER_EMAIL = 'sendsometrends@gmail.com'
+        SENDER_PASSWORD = os.environ['GMAIL_PASSWORD']
+
+        subject = "Youtube Trending Videos"
+
+        email_text = f"""
+        From: {SENDER_EMAIL}
+        To: {RECEIVER_EMAIL}
+        Subject: {subject}
+        
+        {body}
+        """
+
+        server_ssl.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server_ssl.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, email_text)
+        server_ssl.close()
+
+    except:
+        print("Something went wrong")
+
+
 if __name__ == "__main__":
-    print("Creating driver")
-    driver = get_driver()
+    # print("Creating driver")
+    # driver = get_driver()
+    #
+    # print("Fetching trending videos")
+    # videos = get_videos(driver)
+    #
+    # print(f"Found {len(videos)} videos")
+    #
+    # print("Parsing the firs video")
+    #
+    # print("Parsing top 10 videos")
+    # videos_data = [parse_video(video) for video in videos[:10]]
+    #
+    # print(videos_data)
+    #
+    # print("Saving data to csv file....")
+    # videos_df = pd.DataFrame(videos_data)
+    # print(videos_df)
+    # videos_df.to_csv("trending_youtube_videos.csv",index=None)
 
-    print("Fetching trending videos")
-    videos = get_videos(driver)
-
-    print(f"Found {len(videos)} videos")
-
-    print("Parsing the firs video")
-
-    print("Parsing top 10 videos")
-    videos_data = [parse_video(video) for video in videos[:10]]
-
-    print(videos_data)
-
-    print("Saving data to csv file....")
-    videos_df = pd.DataFrame(videos_data)
-    print(videos_df)
-    videos_df.to_csv("trending_youtube_videos.csv",index=None)
-
+    print("Send an email with results")
